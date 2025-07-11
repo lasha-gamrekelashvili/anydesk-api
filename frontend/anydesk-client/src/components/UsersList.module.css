@@ -1,0 +1,31 @@
+.container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+.title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+li {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  color: #444;
+  transition: background 0.2s;
+}
+li:last-child {
+  border-bottom: none;
+}
+li:hover {
+  background: #f5f7fa;
+} 
