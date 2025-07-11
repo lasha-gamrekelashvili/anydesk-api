@@ -10,6 +10,7 @@ import com.example.anydeskapi.services.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -17,11 +18,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
 
     @Override
     public UserResponseDto createUser(UserRequestDto requestDto) {
+        validateUserRequest(requestDto);
+
+        if (userRepository.findAll().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(requestDto.getEmail()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this email already exists.");
+        }
+
         UserEntity user = mapToEntity(requestDto);
         UserEntity saved = userRepository.save(user);
         return mapToDto(saved);
@@ -44,8 +52,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
+        validateUserRequest(requestDto);
+
         UserEntity existing = userRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (userRepository.findAll().stream()
+            .anyMatch(u -> !u.getId().equals(id) && u.getEmail().equalsIgnoreCase(requestDto.getEmail()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Another user with this email already exists.");
+        }
 
         existing.setUsername(requestDto.getUsername());
         existing.setEmail(requestDto.getEmail());
@@ -64,10 +79,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void assignTaskToUser(Long userId, Long taskId) {
         UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         TaskEntity task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new RuntimeException("Task not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        if (user.getTasks().contains(task)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task is already assigned to the user.");
+        }
 
         user.getTasks().add(task);
         userRepository.save(user);
@@ -76,10 +95,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void removeTaskFromUser(Long userId, Long taskId) {
         UserEntity user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         TaskEntity task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new RuntimeException("Task not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        if (!user.getTasks().contains(task)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task is not assigned to the user.");
+        }
 
         user.getTasks().remove(task);
         userRepository.save(user);
@@ -104,5 +127,20 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         return user;
+    }
+
+    private void validateUserRequest(UserRequestDto requestDto) {
+        if (requestDto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null.");
+        }
+        if (!StringUtils.hasText(requestDto.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty.");
+        }
+        if (!StringUtils.hasText(requestDto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email cannot be empty.");
+        }
+        if (!requestDto.getEmail().contains("@")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email format is invalid.");
+        }
     }
 }
