@@ -1,4 +1,4 @@
-package com.example.anydeskapi.data.repositories.interfaces;
+package com.example.anydeskapi.data.repositories;
 
 import com.example.anydeskapi.data.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

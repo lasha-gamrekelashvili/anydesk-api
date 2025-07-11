@@ -18,6 +18,8 @@ public class TaskEntity {
 
 		private String description;
 
+		private boolean completed;
+
 		@ManyToMany(mappedBy = "tasks")
 		private List<UserEntity> assignedUsers;
 }
