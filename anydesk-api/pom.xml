@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>anydesk-api</artifactId>
+    <artifactId>anydesk-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>anydesk-api</name>
     <description>anydesk-api</description>
