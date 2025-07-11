@@ -2,6 +2,7 @@ package com.example.anydeskapi.services;
 
 import com.example.anydeskapi.data.entities.TaskEntity;
 import com.example.anydeskapi.data.entities.UserEntity;
+import com.example.anydeskapi.data.repositories.TaskRepository;
 import com.example.anydeskapi.data.repositories.UserRepository;
 import com.example.anydeskapi.dtos.UserRequestDto;
 import com.example.anydeskapi.dtos.UserResponseDto;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
     @Override
     public UserResponseDto createUser(UserRequestDto requestDto) {
@@ -57,6 +59,30 @@ public class UserServiceImpl implements UserService {
         UserEntity existing = userRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         userRepository.delete(existing);
+    }
+
+    @Override
+    public void assignTaskToUser(Long userId, Long taskId) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        TaskEntity task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        user.getTasks().add(task);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void removeTaskFromUser(Long userId, Long taskId) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        TaskEntity task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        user.getTasks().remove(task);
+        userRepository.save(user);
     }
 
     private UserResponseDto mapToDto(UserEntity user) {

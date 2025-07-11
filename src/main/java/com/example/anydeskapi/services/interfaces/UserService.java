@@ -15,4 +15,8 @@ public interface UserService {
     UserResponseDto updateUser(Long id, UserRequestDto requestDto);
 
     void deleteUser(Long id);
+
+    void assignTaskToUser(Long userId, Long taskId);
+
+    void removeTaskFromUser(Long userId, Long taskId);
 }

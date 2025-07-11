@@ -43,6 +43,18 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{userId}/assign-task/{taskId}")
+    public ResponseEntity<Void> assignTaskToUser(@PathVariable Long userId, @PathVariable Long taskId) {
+        userService.assignTaskToUser(userId, taskId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{userId}/remove-task/{taskId}")
+    public ResponseEntity<Void> removeTaskFromUser(@PathVariable Long userId, @PathVariable Long taskId) {
+        userService.removeTaskFromUser(userId, taskId);
+        return ResponseEntity.ok().build();
+    }
 }
 
 

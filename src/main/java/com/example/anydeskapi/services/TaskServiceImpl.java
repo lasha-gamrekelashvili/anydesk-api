@@ -48,7 +48,6 @@ public class TaskServiceImpl implements TaskService {
 
         existing.setTitle(requestDto.getTitle());
         existing.setDescription(requestDto.getDescription());
-        existing.setCompleted(requestDto.isCompleted());
         TaskEntity updated = taskRepository.save(existing);
 
         return mapToDto(updated);
@@ -66,7 +65,6 @@ public class TaskServiceImpl implements TaskService {
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
-        dto.setCompleted(task.isCompleted());
 
         if (task.getAssignedUsers() != null && !task.getAssignedUsers().isEmpty()) {
             dto.setAssignedUserIds(
@@ -83,7 +81,6 @@ public class TaskServiceImpl implements TaskService {
         TaskEntity task = new TaskEntity();
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
-        task.setCompleted(dto.isCompleted());
         return task;
     }
 }
