@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class TaskRequestDto {
-		private String title;
-		private String description;
-		private boolean completed;
+    private String title;
+    private String description;
+    private boolean completed;
 }

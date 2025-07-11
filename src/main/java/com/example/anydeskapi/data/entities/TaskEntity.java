@@ -10,16 +10,16 @@ import java.util.List;
 @Data
 public class TaskEntity {
 
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-		private String title;
+    private String title;
 
-		private String description;
+    private String description;
 
-		private boolean completed;
+    private boolean completed;
 
-		@ManyToMany(mappedBy = "tasks")
-		private List<UserEntity> assignedUsers;
+    @ManyToMany(mappedBy = "tasks")
+    private List<UserEntity> assignedUsers;
 }

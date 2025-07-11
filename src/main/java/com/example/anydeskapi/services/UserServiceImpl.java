@@ -16,67 +16,67 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-		private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-		@Override
-		public UserResponseDto createUser(UserRequestDto requestDto) {
-				UserEntity user = mapToEntity(requestDto);
-				UserEntity saved = userRepository.save(user);
-				return mapToDto(saved);
-		}
+    @Override
+    public UserResponseDto createUser(UserRequestDto requestDto) {
+        UserEntity user = mapToEntity(requestDto);
+        UserEntity saved = userRepository.save(user);
+        return mapToDto(saved);
+    }
 
-		@Override
-		public List<UserResponseDto> getAllUsers() {
-				return userRepository.findAll()
-								.stream()
-								.map(this::mapToDto)
-								.toList();
-		}
+    @Override
+    public List<UserResponseDto> getAllUsers() {
+        return userRepository.findAll()
+            .stream()
+            .map(this::mapToDto)
+            .toList();
+    }
 
-		@Override
-		public UserResponseDto getUserById(Long id) {
-				UserEntity user = userRepository.findById(id)
-								.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-				return mapToDto(user);
-		}
+    @Override
+    public UserResponseDto getUserById(Long id) {
+        UserEntity user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return mapToDto(user);
+    }
 
-		@Override
-		public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
-				UserEntity existing = userRepository.findById(id)
-								.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    @Override
+    public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
+        UserEntity existing = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-				existing.setUsername(requestDto.getUsername());
-				existing.setEmail(requestDto.getEmail());
-				UserEntity updated = userRepository.save(existing);
+        existing.setUsername(requestDto.getUsername());
+        existing.setEmail(requestDto.getEmail());
+        UserEntity updated = userRepository.save(existing);
 
-				return mapToDto(updated);
-		}
+        return mapToDto(updated);
+    }
 
-		@Override
-		public void deleteUser(Long id) {
-				UserEntity existing = userRepository.findById(id)
-								.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-				userRepository.delete(existing);
-		}
+    @Override
+    public void deleteUser(Long id) {
+        UserEntity existing = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        userRepository.delete(existing);
+    }
 
-		private UserResponseDto mapToDto(UserEntity user) {
-				UserResponseDto dto = new UserResponseDto();
-				dto.setId(user.getId());
-				dto.setUsername(user.getUsername());
-				dto.setEmail(user.getEmail());
-				if (user.getTasks() != null) {
-						dto.setTaskIds(user.getTasks()
-										.stream()
-										.map(TaskEntity::getId)
-										.toList());
-				}
-				return dto;
-		}
+    private UserResponseDto mapToDto(UserEntity user) {
+        UserResponseDto dto = new UserResponseDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        if (user.getTasks() != null) {
+            dto.setTaskIds(user.getTasks()
+                .stream()
+                .map(TaskEntity::getId)
+                .toList());
+        }
+        return dto;
+    }
 
-		private UserEntity mapToEntity(UserRequestDto dto) {
-				UserEntity user = new UserEntity();
-				user.setUsername(dto.getUsername());
-				user.setEmail(dto.getEmail());
-				return user;
-		}
+    private UserEntity mapToEntity(UserRequestDto dto) {
+        UserEntity user = new UserEntity();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        return user;
+    }
 }
