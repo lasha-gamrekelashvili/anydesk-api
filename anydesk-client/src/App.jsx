@@ -24,7 +24,10 @@ function App() {
         if (!res.ok) throw new Error('Failed to fetch users')
         return res.json()
       })
-      .then(setUsers)
+      .then(fetchedUsers => {
+        setUsers(fetchedUsers);
+        setSelectedUser(prev => prev && !fetchedUsers.some(u => u.id === prev.id) ? null : prev);
+      })
       .catch(() => setUsers([]))
   }, [usersRefreshKey])
 
@@ -34,7 +37,11 @@ function App() {
         if (!res.ok) throw new Error('Failed to fetch tasks')
         return res.json()
       })
-      .then(setTasks)
+      .then(fetchedTasks => {
+        setTasks(fetchedTasks);
+        // Clear selectedTask if it no longer exists
+        setSelectedTask(prev => prev && !fetchedTasks.some(t => t.id === prev.id) ? null : prev);
+      })
       .catch(() => setTasks([]))
   }, [tasksRefreshKey])
 

@@ -9,7 +9,6 @@ import com.example.anydeskapi.services.interfaces.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -22,8 +21,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDto createTask(TaskRequestDto requestDto) {
-        validateTaskRequest(requestDto);
-
         if (taskRepository.findAll().stream()
             .anyMatch(t -> t.getTitle().equalsIgnoreCase(requestDto.getTitle()))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task with this title already exists.");
@@ -51,10 +48,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDto updateTask(Long id, TaskRequestDto requestDto) {
-        validateTaskRequest(requestDto);
-
         TaskEntity existing = taskRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        if (taskRepository.findAll().stream()
+            .anyMatch(t -> t.getTitle().equalsIgnoreCase(requestDto.getTitle()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Another Task with this title already exists.");
+        }
 
         existing.setTitle(requestDto.getTitle());
         existing.setDescription(requestDto.getDescription());
@@ -92,19 +92,5 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         return task;
-    }
-
-    private void validateTaskRequest(TaskRequestDto requestDto) {
-        if (requestDto == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null.");
-        }
-
-        if (!StringUtils.hasText(requestDto.getTitle())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task title cannot be empty.");
-        }
-
-        if (!StringUtils.hasText(requestDto.getDescription())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task description cannot be empty.");
-        }
     }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import cardStyles from './CardList.module.css';
-import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiUser, FiMail, FiList } from 'react-icons/fi';
 
 function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAddUser }) {
   const [editUserId, setEditUserId] = useState(null);
@@ -33,7 +33,14 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAd
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: editUsername, email: editEmail }),
       });
-      if (!res.ok) throw new Error('Failed to update user');
+      if (!res.ok) {
+        let msg = 'Failed to update user';
+        try {
+          const data = await res.json();
+          if (data && (data.message || data.error)) msg = data.message || data.error;
+        } catch {}
+        throw new Error(msg);
+      }
       setEditUserId(null);
       setEditUsername('');
       setEditEmail('');
@@ -100,25 +107,27 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAd
                         Cancel
                       </button>
                     </div>
-                    {editError && <div className={cardStyles.errorMessage}>{editError}</div>}
+                    {editError && (
+                      <div className={cardStyles.errorInline}>{editError}</div>
+                    )}
                   </form>
                 ) : (
                   <>
                     <div className={cardStyles.fieldRow}>
-                      <strong>Username</strong>
+                      <strong><FiUser style={{marginRight: 4}} /> Username</strong>
                       <span>{user.username}</span>
                     </div>
                     <div className={cardStyles.fieldRow}>
-                      <strong>Email</strong>
+                      <strong><FiMail style={{marginRight: 4}} /> Email</strong>
                       <span>{user.email}</span>
                     </div>
                     <div className={cardStyles.fieldRow}>
-                      <strong>Tasks</strong>
-                      <span>{assignedTasks.length > 0 ? assignedTasks.join(', ') : 'None'}</span>
+                      <strong><FiList style={{marginRight: 4}} /> Tasks</strong>
+                      <span className={cardStyles.descriptionText}>{assignedTasks.length > 0 ? assignedTasks.join(', ') : 'None'}</span>
                     </div>
                     {isSelected && (
                       <div className={cardStyles.actions}>
-                        <button onClick={e => { e.stopPropagation(); startEdit(user); }}>
+                        <button className={cardStyles.saveBtn} onClick={e => { e.stopPropagation(); startEdit(user); }}>
                           <FiEdit size={14} /> Edit
                         </button>
                         <button

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from './CardList.module.css';
 
 function AddTaskForm({ onTaskAdded, noCard }) {
   const [title, setTitle] = useState('');
@@ -16,7 +17,14 @@ function AddTaskForm({ onTaskAdded, noCard }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description }),
       });
-      if (!res.ok) throw new Error('Failed to add task');
+      if (!res.ok) {
+        let msg = 'Failed to add task';
+        try {
+          const data = await res.json();
+          if (data && (data.message || data.error)) msg = data.message || data.error;
+        } catch {}
+        throw new Error(msg);
+      }
       setTitle('');
       setDescription('');
       if (onTaskAdded) onTaskAdded();
@@ -50,10 +58,10 @@ function AddTaskForm({ onTaskAdded, noCard }) {
           style={{ width: '100%', minHeight: 60 }}
         />
       </div>
-      <button type="submit" disabled={loading} style={{ width: '100%', marginTop: 6 }}>
+      <button type="submit" className={styles.saveBtn} disabled={loading} style={{ width: '100%', marginTop: 6 }}>
         {loading ? 'Adding...' : 'Add Task'}
       </button>
-      {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+      {error && <div className={styles.errorInline}>{error}</div>}
     </form>
   );
 }

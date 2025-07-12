@@ -2,6 +2,7 @@ package com.example.anydeskapi.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,5 +26,14 @@ public class GlobalExceptionHandler {
         Map<String, String> errorBody = new HashMap<>();
         errorBody.put("error", "Internal Server Error");
         return new ResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errorBody = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errorBody.put(error.getField(), error.getDefaultMessage());
+        });
+        return new ResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 }

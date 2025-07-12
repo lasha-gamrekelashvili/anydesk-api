@@ -200,14 +200,21 @@ form.card > div {
   align-items: center;
 }
 .assign-panel:not(:disabled):not(.unassign) {
-  background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%); 
+  background: linear-gradient(90deg, #6366f1 0%, #7b8cff 100%);
   color: #fff;
-  border-color: #2563eb; 
+  border-color: #6366f1;
+  box-shadow: 0 4px 18px 0 rgba(99, 102, 241, 0.18), 0 1.5px 8px 0 rgba(99,102,241,0.10);
+}
+.assign-panel:not(:disabled):not(.unassign):hover {
+  background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
 }
 .assign-panel.unassign:not(:disabled) {
   background: linear-gradient(90deg, #e53935 0%, #ffb36f 100%);
   color: #fff;
   border-color: #e53935;
+}
+.assign-panel.unassign:not(:disabled):hover {
+  background: linear-gradient(90deg, #b91c1c 0%, #ff9800 100%);
 }
 @keyframes jiggle {
   0% { transform: translateX(-50%) scale(1) rotate(0deg); }

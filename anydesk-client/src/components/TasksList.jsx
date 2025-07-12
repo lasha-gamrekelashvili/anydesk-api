@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiTag, FiFileText, FiUsers } from 'react-icons/fi';
 import styles from './CardList.module.css';
 
 function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAddTask }) {
@@ -33,7 +33,14 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: editTitle, description: editDescription }),
       });
-      if (!res.ok) throw new Error('Failed to update task');
+      if (!res.ok) {
+        let msg = 'Failed to update task';
+        try {
+          const data = await res.json();
+          if (data && (data.message || data.error)) msg = data.message || data.error;
+        } catch {}
+        throw new Error(msg);
+      }
       setEditTaskId(null);
       setEditTitle('');
       setEditDescription('');
@@ -100,26 +107,28 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
                         Cancel
                       </button>
                     </div>
-                    {editError && <div className={styles.errorMessage}>{editError}</div>}
+                    {editError && (
+                      <div className={styles.errorInline}>{editError}</div>
+                    )}
                   </form>
                 ) : (
                   <>
                     <div className={styles.fieldRow}>
-                      <strong>Title</strong>
+                      <strong><FiTag style={{marginRight: 4}} /> Title</strong>
                       <span>{task.title}</span>
                     </div>
                     <div className={styles.fieldRow}>
-                      <strong>Description</strong>
-                      <span>{task.description}</span>
+                      <strong><FiFileText style={{marginRight: 4}} /> Description</strong>
+                      <span className={styles.descriptionText}>{task.description}</span>
                     </div>
                     <div className={styles.fieldRow}>
-                      <strong>Users</strong>
-                      <span>{assignedUsers.join(', ') || 'None'}</span>
+                      <strong><FiUsers style={{marginRight: 4}} /> Users</strong>
+                      <span className={styles.descriptionText}>{assignedUsers.join(', ') || 'None'}</span>
                     </div>
 
                     {isSelected && (
                       <div className={styles.actions}>
-                        <button onClick={e => { e.stopPropagation(); startEdit(task); }}>
+                        <button className={styles.saveBtn} onClick={e => { e.stopPropagation(); startEdit(task); }}>
                           <FiEdit size={14} /> Edit
                         </button>
                         <button

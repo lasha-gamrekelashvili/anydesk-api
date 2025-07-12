@@ -10,7 +10,6 @@ import com.example.anydeskapi.services.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -24,8 +23,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto requestDto) {
-        validateUserRequest(requestDto);
-
         if (userRepository.findAll().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(requestDto.getEmail()))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this email already exists.");
         }
@@ -52,8 +49,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
-        validateUserRequest(requestDto);
-
         UserEntity existing = userRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -127,20 +122,5 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         return user;
-    }
-
-    private void validateUserRequest(UserRequestDto requestDto) {
-        if (requestDto == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request cannot be null.");
-        }
-        if (!StringUtils.hasText(requestDto.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty.");
-        }
-        if (!StringUtils.hasText(requestDto.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email cannot be empty.");
-        }
-        if (!requestDto.getEmail().contains("@")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email format is invalid.");
-        }
     }
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import cardStyles from './CardList.module.css';
 
 function AddUserForm({ onUserAdded, noCard }) {
   const [username, setUsername] = useState('');
@@ -16,7 +17,14 @@ function AddUserForm({ onUserAdded, noCard }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email }),
       });
-      if (!res.ok) throw new Error('Failed to add user');
+      if (!res.ok) {
+        let msg = 'Failed to add user';
+        try {
+          const data = await res.json();
+          if (data && (data.message || data.error)) msg = data.message || data.error;
+        } catch {}
+        throw new Error(msg);
+      }
       setUsername('');
       setEmail('');
       if (onUserAdded) onUserAdded();
@@ -51,10 +59,10 @@ function AddUserForm({ onUserAdded, noCard }) {
           style={{ width: '100%' }}
         />
       </div>
-      <button type="submit" disabled={loading} style={{ width: '100%', marginTop: 6 }}>
+      <button type="submit" className={cardStyles.saveBtn} disabled={loading} style={{ width: '100%', marginTop: 6 }}>
         {loading ? 'Adding...' : 'Add User'}
       </button>
-      {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+      {error && <div className={cardStyles.errorInline}>{error}</div>}
     </form>
   );
 }
