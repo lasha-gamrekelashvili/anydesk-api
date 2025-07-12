@@ -28,28 +28,29 @@ function AddTaskForm({ onTaskAdded }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1.5rem', maxWidth: 400 }}>
-      <h3>Add Task</h3>
-      <div style={{ marginBottom: 8 }}>
+    <form onSubmit={handleSubmit} className="card" style={{ width: '100%', maxWidth: 380, marginBottom: 16, textAlign: 'left' }}>
+      <div style={{ marginBottom: 14 }}>
         <input
+          className="input"
           type="text"
           placeholder="Title"
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
-          style={{ width: '100%', padding: 8 }}
+          style={{ width: '100%' }}
         />
       </div>
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 14 }}>
         <textarea
+          className="input"
           placeholder="Description"
           value={description}
           onChange={e => setDescription(e.target.value)}
           required
-          style={{ width: '100%', padding: 8, minHeight: 60 }}
+          style={{ width: '100%', minHeight: 60 }}
         />
       </div>
-      <button type="submit" disabled={loading} style={{ padding: '8px 16px' }}>
+      <button type="submit" disabled={loading} style={{ width: '100%', marginTop: 6 }}>
         {loading ? 'Adding...' : 'Add Task'}
       </button>
       {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}

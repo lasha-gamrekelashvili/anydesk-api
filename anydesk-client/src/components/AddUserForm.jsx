@@ -28,29 +28,30 @@ function AddUserForm({ onUserAdded }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1.5rem', maxWidth: 400 }}>
-      <h3>Add User</h3>
-      <div style={{ marginBottom: 8 }}>
+    <form onSubmit={handleSubmit} className="card" style={{ width: '100%', maxWidth: 380, marginBottom: 16, textAlign: 'left' }}>
+      <div style={{ marginBottom: 14 }}>
         <input
+          className="input"
           type="text"
           placeholder="Username"
           value={username}
           onChange={e => setUsername(e.target.value)}
           required
-          style={{ width: '100%', padding: 8 }}
+          style={{ width: '100%' }}
         />
       </div>
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 14 }}>
         <input
+          className="input"
           type="email"
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          style={{ width: '100%', padding: 8 }}
+          style={{ width: '100%' }}
         />
       </div>
-      <button type="submit" disabled={loading} style={{ padding: '8px 16px' }}>
+      <button type="submit" disabled={loading} style={{ width: '100%', marginTop: 6 }}>
         {loading ? 'Adding...' : 'Add User'}
       </button>
       {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}

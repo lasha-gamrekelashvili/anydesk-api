@@ -47,6 +47,10 @@ function App() {
       setActionSuccess('Task assigned to user!')
       setUsersRefreshKey(k => k + 1)
       setTasksRefreshKey(k => k + 1)
+      // Update selectedUser's taskIds immediately
+      setSelectedUser(prev => prev && prev.id === user.id
+        ? { ...prev, taskIds: [...(prev.taskIds || []), task.id] }
+        : prev)
     } catch (err) {
       setActionError(err.message)
     } finally {
@@ -65,6 +69,9 @@ function App() {
       setActionSuccess('Task removed from user!')
       setUsersRefreshKey(k => k + 1)
       setTasksRefreshKey(k => k + 1)
+      setSelectedUser(prev => prev && prev.id === user.id
+        ? { ...prev, taskIds: (prev.taskIds || []).filter(id => id !== task.id) }
+        : prev)
     } catch (err) {
       setActionError(err.message)
     } finally {
@@ -83,11 +90,26 @@ function App() {
     setSelectedTask(selectedTask && selectedTask.id === task.id ? null : task)
   }
 
+  useEffect(() => {
+    if (actionError || actionSuccess) {
+      const timer = setTimeout(() => {
+        setActionError(null);
+        setActionSuccess(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionError, actionSuccess]);
+
   return (
     <>
-      <div className="lists-row" style={{ alignItems: 'flex-start' }}>
+      <div className="dashboard-grid">
         <div>
           <AddUserForm onUserAdded={() => setUsersRefreshKey(k => k + 1)} />
+        </div>
+        <div>
+          <AddTaskForm onTaskAdded={() => setTasksRefreshKey(k => k + 1)} />
+        </div>
+        <div className="users-list-scrollable">
           <UsersList
             users={users}
             tasks={tasks}
@@ -97,7 +119,6 @@ function App() {
           />
         </div>
         <div>
-          <AddTaskForm onTaskAdded={() => setTasksRefreshKey(k => k + 1)} />
           <TasksList
             tasks={tasks}
             users={users}
@@ -108,44 +129,40 @@ function App() {
         </div>
       </div>
       {selectedUser && selectedTask && (
-        <div style={{
-          margin: '2rem auto',
-          padding: '1.5rem',
-          background: '#f7fafd',
-          borderRadius: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-          minWidth: 260,
-          maxWidth: 400,
-          textAlign: 'center',
-        }}>
-          <div style={{ marginBottom: 8 }}>
-            <strong>User:</strong> {selectedUser.username} <br />
-            <strong>Task:</strong> {selectedTask.title}
+        <div style={{ position: 'fixed', right: 24, top: 24, zIndex: 102, minWidth: 180, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          {(actionError || actionSuccess) && (
+            <div style={{
+              marginBottom: 8,
+              textAlign: 'center',
+              pointerEvents: 'none',
+            }}>
+              {actionError && <div style={{ color: 'red', background: '#fff', borderRadius: 5, padding: '6px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>{actionError}</div>}
+              {actionSuccess && <div style={{ color: 'green', background: '#fff', borderRadius: 5, padding: '6px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>{actionSuccess}</div>}
+            </div>
+          )}
+          <div className="modal-panel">
+            <div style={{ marginBottom: 8, fontSize: '0.98rem' }}>
+              <strong>User:</strong> {selectedUser.username} <br />
+              <strong>Task:</strong> {selectedTask.title}
+            </div>
+            {!isAssigned && (
+              <button
+                onClick={() => handleAssign(selectedUser, selectedTask)}
+                disabled={actionLoading}
+                style={{ marginRight: 8 }}
+              >
+                Assign
+              </button>
+            )}
+            {isAssigned && (
+              <button
+                onClick={() => handleRemove(selectedUser, selectedTask)}
+                disabled={actionLoading}
+              >
+                Remove
+              </button>
+            )}
           </div>
-          {!isAssigned && (
-            <button
-              onClick={() => handleAssign(selectedUser, selectedTask)}
-              disabled={actionLoading}
-              style={{ marginRight: 12, padding: '8px 16px' }}
-            >
-              Assign
-            </button>
-          )}
-          {isAssigned && (
-            <button
-              onClick={() => handleRemove(selectedUser, selectedTask)}
-              disabled={actionLoading}
-              style={{ padding: '8px 16px' }}
-            >
-              Remove
-            </button>
-          )}
-        </div>
-      )}
-      {(actionError || actionSuccess) && (
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
-          {actionError && <div style={{ color: 'red' }}>{actionError}</div>}
-          {actionSuccess && <div style={{ color: 'green' }}>{actionSuccess}</div>}
         </div>
       )}
     </>

@@ -1,12 +1,10 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', 'Roboto', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #222;
+  background-color: #f6f8fa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,10 +22,11 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: #f6f8fa;
+  color: #222;
+  font-family: 'Inter', 'Roboto', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 h1 {
@@ -35,23 +34,65 @@ h1 {
   line-height: 1.1;
 }
 
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.input, input, textarea {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #f9fafb;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.input:focus, input:focus, textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #6366f122;
+}
+
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid #d1d5db;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #6366f1;
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #4f46e5;
+  border-color: #6366f1;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+button:focus {
+  outline: 2px solid #6366f1;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+.modal-panel {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.10);
+  padding: 2rem 1.5rem;
+  max-width: 420px;
+  margin: 2rem auto;
+  text-align: center;
+  border: 1.5px solid #e0e7ff;
 }
 
 @media (prefers-color-scheme: light) {
@@ -64,5 +105,12 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@media (max-width: 900px) {
+  .lists-row {
+    flex-direction: column;
+    gap: 2rem;
   }
 }

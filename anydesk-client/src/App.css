@@ -1,51 +1,146 @@
 #root {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem 1rem;
   text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
 
 .lists-row {
   display: flex;
   flex-direction: row;
-  gap: 2rem;
-  justify-content: flex-start;
+  gap: 2.5rem;
+  justify-content: center;
   align-items: flex-start;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .lists-row {
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+button {
+  background: #2563eb; 
+  color: #fff;         
+  border: none;
+  padding: 0.6em 1.2em;
+  border-radius: 4px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+button:disabled {
+  background: #a1a1aa;
+  color: #f4f4f5;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+button:hover:not(:disabled),
+button:focus-visible:not(:disabled) {
+  background: #1e40af; 
+  outline: none;
+}
+
+.card {
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px 0 rgba(30, 64, 175, 0.06);
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+
+.input,
+textarea.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75em 1em;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1.05em;
+  margin-bottom: 0.9em;
+  background: #f8fafc;
+  transition: border 0.2s;
+}
+
+.input:focus,
+textarea.input:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+textarea.input {
+  min-height: 44px;
+  max-height: 120px;
+  resize: vertical;
+}
+
+form.card > div {
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .card {
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    max-width: 98vw !important;
+    min-width: 0;
+  }
+}
+
+.centerColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 2.5rem;
+  justify-items: center;
+  align-items: start;
+  margin-bottom: 2rem;
+  padding-bottom: 100px; /* Adjust if modal-panel height changes */
+}
+
+/* Fix the modal panel to the bottom of the viewport */
+.modal-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 14px 18px 12px 18px;
+  min-width: 180px;
+  max-width: 90vw;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.98rem;
+}
+
+.modal-panel button {
+  min-width: 70px !important;
+  padding: 4px 12px;
+  font-size: 0.98rem;
+  border-radius: 5px;
 }

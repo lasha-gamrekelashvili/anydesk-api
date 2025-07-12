@@ -46,7 +46,7 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated }) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Users</div>
+      <div className="section-title">Users</div>
       <ul>
         {users.map((user) => {
           const assignedTasks = (user.taskIds || [])
@@ -57,14 +57,36 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated }) {
           return (
             <li
               key={user.id}
+              className={isSelected ? styles.selected : ''}
               onClick={() => !isEditing && onSelect && onSelect(user)}
               style={{
                 cursor: isEditing ? 'default' : 'pointer',
-                background: isSelected ? '#e0f7fa' : undefined,
-                borderRadius: isSelected ? 6 : undefined,
                 position: 'relative',
+                listStyle: 'none',
+                marginBottom: 24,
               }}
             >
+              {isSelected && !isEditing && (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
+                  <button
+                    style={{ padding: '2px 10px', fontSize: 13 }}
+                    onClick={e => { e.stopPropagation(); startEdit(user); }}
+                  >Edit</button>
+                  <button
+                    style={{ padding: '2px 10px', fontSize: 13, background: '#e53935', color: '#fff', border: 'none', borderRadius: 3 }}
+                    onClick={async e => {
+                      e.stopPropagation();
+                      try {
+                        const res = await fetch(`/api/users/${user.id}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error('Failed to remove user');
+                        if (onUserUpdated) onUserUpdated();
+                      } catch (err) {
+                        alert(err.message);
+                      }
+                    }}
+                  >Remove</button>
+                </div>
+              )}
               {isEditing ? (
                 <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <input
@@ -94,16 +116,10 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated }) {
               ) : (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span><strong>Username:</strong> {user.username}</span>
-                    {isSelected && (
-                      <button
-                        style={{ marginLeft: 8, padding: '2px 10px', fontSize: 13 }}
-                        onClick={e => { e.stopPropagation(); startEdit(user); }}
-                      >Edit</button>
-                    )}
+                    <span className={styles.fieldRow}><strong>Username:</strong> {user.username}</span>
                   </div>
-                  <div><strong>Email:</strong> {user.email}</div>
-                  <div style={{ fontSize: '0.95em', color: '#666', marginTop: 4 }}>
+                  <div className={styles.fieldRow} style={{ marginRight: isSelected ? 70 : undefined }}><strong>Email:</strong> {user.email}</div>
+                  <div className={styles.fieldRow} style={{ fontSize: '0.95em', color: '#666', marginTop: 4 }}>
                     <strong>Tasks:</strong> {assignedTasks.length > 0 ? assignedTasks.join(', ') : 'None'}
                   </div>
                 </div>
