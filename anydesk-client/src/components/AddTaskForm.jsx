@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function AddTaskForm({ onTaskAdded }) {
+function AddTaskForm({ onTaskAdded, noCard }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ function AddTaskForm({ onTaskAdded }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card" style={{ width: '100%', maxWidth: 380, marginBottom: 16, textAlign: 'left' }}>
+    <form onSubmit={handleSubmit} className={noCard ? '' : 'card'} style={noCard ? { width: '100%', maxWidth: 380, textAlign: 'left' } : { width: '100%', maxWidth: 380, marginBottom: 16, textAlign: 'left' }}>
       <div style={{ marginBottom: 14 }}>
         <input
           className="input"

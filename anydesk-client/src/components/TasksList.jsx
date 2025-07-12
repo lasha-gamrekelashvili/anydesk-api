@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import styles from './TasksList.module.css';
+import React, { useState } from 'react';
+import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import styles from './CardList.module.css';
 
-function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated }) {
+function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAddTask }) {
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -36,7 +37,7 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated }) {
       setEditTaskId(null);
       setEditTitle('');
       setEditDescription('');
-      if (onTaskUpdated) onTaskUpdated();
+      onTaskUpdated?.();
     } catch (err) {
       setEditError(err.message);
     } finally {
@@ -46,89 +47,107 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated }) {
 
   return (
     <div className={styles.container}>
-      <div className="section-title">Tasks</div>
-      <ul>
-        {tasks.map((task) => {
-          const assignedUsers = (task.assignedUserIds || [])
-            .map(userId => users.find(u => u.id === userId)?.username)
-            .filter(Boolean);
-          const isSelected = selectedTaskId === task.id;
-          const isEditing = editTaskId === task.id;
-          return (
-            <li
-              key={task.id}
-              className={isSelected ? styles.selected : ''}
-              onClick={() => !isEditing && onSelect && onSelect(task)}
-              style={{
-                cursor: isEditing ? 'default' : 'pointer',
-                position: 'relative',
-                listStyle: 'none',
-                marginBottom: 24,
-              }}
-            >
-              {isSelected && !isEditing && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
-                  <button
-                    style={{ padding: '2px 10px', fontSize: 13 }}
-                    onClick={e => { e.stopPropagation(); startEdit(task); }}
-                  >Edit</button>
-                  <button
-                    style={{ padding: '2px 10px', fontSize: 13, background: '#e53935', color: '#fff', border: 'none', borderRadius: 3 }}
-                    onClick={async e => {
-                      e.stopPropagation();
-                      try {
-                        const res = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
-                        if (!res.ok) throw new Error('Failed to remove task');
-                        if (onTaskUpdated) onTaskUpdated();
-                      } catch (err) {
-                        alert(err.message);
-                      }
-                    }}
-                  >Remove</button>
-                </div>
-              )}
-              {isEditing ? (
-                <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={e => setEditTitle(e.target.value)}
-                    required
-                    style={{ padding: 6 }}
-                  />
-                  <textarea
-                    value={editDescription}
-                    onChange={e => setEditDescription(e.target.value)}
-                    required
-                    style={{ padding: 6, minHeight: 48 }}
-                  />
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                    <button type="submit" disabled={editLoading} style={{ padding: '4px 12px' }}>
-                      Save
-                    </button>
-                    <button type="button" onClick={cancelEdit} disabled={editLoading} style={{ padding: '4px 12px' }}>
-                      Cancel
-                    </button>
-                  </div>
-                  {editError && <div style={{ color: 'red', fontSize: 13 }}>{editError}</div>}
-                </form>
-              ) : (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className={styles.fieldRow}><strong>Title:</strong> {task.title}</span>
-                  </div>
-                  <div className={styles.fieldRow} style={{ marginRight: isSelected ? 70 : undefined }}><strong>Description:</strong> {task.description}</div>
-                  <div className={styles.fieldRow} style={{ fontSize: '0.95em', color: '#666', marginTop: 4 }}>
-                    <strong>Users:</strong> {assignedUsers.length > 0 ? assignedUsers.join(', ') : 'None'}
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4, borderBottom: '2px solid #e5e7eb', marginBottom: 16}}>
+        <div className={styles.title}>Tasks</div>
+        <button className={styles.saveBtn} style={{marginLeft: 12}} onClick={e => { e.stopPropagation(); onAddTask && onAddTask(); }}>Add Task</button>
+      </div>
+      {tasks.length === 0 ? (
+        <div className={styles.emptyMessage}>No tasks... maybe someone will add some</div>
+      ) : (
+        <ul>
+          {tasks.map((task) => {
+            const assignedUsers = (task.assignedUserIds || [])
+              .map(id => users.find(u => u.id === id)?.username)
+              .filter(Boolean);
+            const isSelected = selectedTaskId === task.id;
+            const isEditing  = editTaskId === task.id;
+
+            return (
+              <li
+                key={task.id}
+                className={`${styles.cardItem} ${isSelected ? styles.selected : ''}`}
+                onClick={() => !isEditing && onSelect?.(task)}
+              >
+                {isEditing ? (
+                  <form className={styles.editForm} onSubmit={handleEditSubmit}>
+                    <input
+                      className={styles.editInput}
+                      type="text"
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                      required
+                    />
+                    <textarea
+                      className={styles.editTextarea}
+                      value={editDescription}
+                      onChange={e => setEditDescription(e.target.value)}
+                      required
+                    />
+                    <div className={styles.editActions}>
+                      <button
+                        type="submit"
+                        className={styles.saveBtn}
+                        disabled={editLoading}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.cancelBtn}
+                        onClick={cancelEdit}
+                        disabled={editLoading}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    {editError && <div className={styles.errorMessage}>{editError}</div>}
+                  </form>
+                ) : (
+                  <>
+                    <div className={styles.fieldRow}>
+                      <strong>Title</strong>
+                      <span>{task.title}</span>
+                    </div>
+                    <div className={styles.fieldRow}>
+                      <strong>Description</strong>
+                      <span>{task.description}</span>
+                    </div>
+                    <div className={styles.fieldRow}>
+                      <strong>Users</strong>
+                      <span>{assignedUsers.join(', ') || 'None'}</span>
+                    </div>
+
+                    {isSelected && (
+                      <div className={styles.actions}>
+                        <button onClick={e => { e.stopPropagation(); startEdit(task); }}>
+                          <FiEdit size={14} /> Edit
+                        </button>
+                        <button
+                          className={styles.removeBtn}
+                          onClick={async e => {
+                            e.stopPropagation();
+                            try {
+                              const res = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+                              if (!res.ok) throw new Error('Failed to remove task');
+                              onTaskUpdated?.();
+                            } catch (err) {
+                              alert(err.message);
+                            }
+                          }}
+                        >
+                          <FiTrash2 size={14} /> Remove
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
 
-export default TasksList; 
+export default TasksList;

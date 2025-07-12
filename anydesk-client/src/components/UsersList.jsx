@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import styles from './UsersList.module.css';
+import cardStyles from './CardList.module.css';
+import { FiEdit, FiTrash2 } from 'react-icons/fi';
 
-function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated }) {
+function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAddUser }) {
   const [editUserId, setEditUserId] = useState(null);
   const [editUsername, setEditUsername] = useState('');
   const [editEmail, setEditEmail] = useState('');
@@ -45,89 +46,105 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated }) {
   };
 
   return (
-    <div className={styles.container}>
-      <div className="section-title">Users</div>
-      <ul>
-        {users.map((user) => {
-          const assignedTasks = (user.taskIds || [])
-            .map(taskId => tasks.find(t => t.id === taskId)?.title)
-            .filter(Boolean);
-          const isSelected = selectedUserId === user.id;
-          const isEditing = editUserId === user.id;
-          return (
-            <li
-              key={user.id}
-              className={isSelected ? styles.selected : ''}
-              onClick={() => !isEditing && onSelect && onSelect(user)}
-              style={{
-                cursor: isEditing ? 'default' : 'pointer',
-                position: 'relative',
-                listStyle: 'none',
-                marginBottom: 24,
-              }}
-            >
-              {isSelected && !isEditing && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
-                  <button
-                    style={{ padding: '2px 10px', fontSize: 13 }}
-                    onClick={e => { e.stopPropagation(); startEdit(user); }}
-                  >Edit</button>
-                  <button
-                    style={{ padding: '2px 10px', fontSize: 13, background: '#e53935', color: '#fff', border: 'none', borderRadius: 3 }}
-                    onClick={async e => {
-                      e.stopPropagation();
-                      try {
-                        const res = await fetch(`/api/users/${user.id}`, { method: 'DELETE' });
-                        if (!res.ok) throw new Error('Failed to remove user');
-                        if (onUserUpdated) onUserUpdated();
-                      } catch (err) {
-                        alert(err.message);
-                      }
-                    }}
-                  >Remove</button>
-                </div>
-              )}
-              {isEditing ? (
-                <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <input
-                    type="text"
-                    value={editUsername}
-                    onChange={e => setEditUsername(e.target.value)}
-                    required
-                    style={{ padding: 6 }}
-                  />
-                  <input
-                    type="email"
-                    value={editEmail}
-                    onChange={e => setEditEmail(e.target.value)}
-                    required
-                    style={{ padding: 6 }}
-                  />
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                    <button type="submit" disabled={editLoading} style={{ padding: '4px 12px' }}>
-                      Save
-                    </button>
-                    <button type="button" onClick={cancelEdit} disabled={editLoading} style={{ padding: '4px 12px' }}>
-                      Cancel
-                    </button>
-                  </div>
-                  {editError && <div style={{ color: 'red', fontSize: 13 }}>{editError}</div>}
-                </form>
-              ) : (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className={styles.fieldRow}><strong>Username:</strong> {user.username}</span>
-                  </div>
-                  <div className={styles.fieldRow} style={{ marginRight: isSelected ? 70 : undefined }}><strong>Email:</strong> {user.email}</div>
-                  <div className={styles.fieldRow} style={{ fontSize: '0.95em', color: '#666', marginTop: 4 }}>
-                    <strong>Tasks:</strong> {assignedTasks.length > 0 ? assignedTasks.join(', ') : 'None'}
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+    <div className={cardStyles.container}>
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4, borderBottom: '2px solid #e5e7eb', marginBottom: 16}}>
+        <div className={cardStyles.title}>Users</div>
+        <button className={cardStyles.saveBtn} style={{marginLeft: 12}} onClick={e => { e.stopPropagation(); onAddUser && onAddUser(); }}>Add User</button>
+      </div>
+      {users.length === 0 ? (
+        <div className={cardStyles.emptyMessage}>No users... maybe someone will add some</div>
+      ) : (
+        <ul>
+          {users.map((user) => {
+            const assignedTasks = (user.taskIds || [])
+              .map(taskId => tasks.find(t => t.id === taskId)?.title)
+              .filter(Boolean);
+            const isSelected = selectedUserId === user.id;
+            const isEditing = editUserId === user.id;
+            return (
+              <li
+                key={user.id}
+                className={`${cardStyles.cardItem} ${isSelected ? cardStyles.selected : ''}`}
+                onClick={() => !isEditing && onSelect && onSelect(user)}
+              >
+                {isEditing ? (
+                  <form className={cardStyles.editForm} onSubmit={handleEditSubmit}>
+                    <input
+                      className={cardStyles.editInput}
+                      type="text"
+                      value={editUsername}
+                      onChange={e => setEditUsername(e.target.value)}
+                      required
+                    />
+                    <input
+                      className={cardStyles.editInput}
+                      type="email"
+                      value={editEmail}
+                      onChange={e => setEditEmail(e.target.value)}
+                      required
+                    />
+                    <div className={cardStyles.editActions}>
+                      <button
+                        type="submit"
+                        className={cardStyles.saveBtn}
+                        disabled={editLoading}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className={cardStyles.cancelBtn}
+                        onClick={cancelEdit}
+                        disabled={editLoading}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    {editError && <div className={cardStyles.errorMessage}>{editError}</div>}
+                  </form>
+                ) : (
+                  <>
+                    <div className={cardStyles.fieldRow}>
+                      <strong>Username</strong>
+                      <span>{user.username}</span>
+                    </div>
+                    <div className={cardStyles.fieldRow}>
+                      <strong>Email</strong>
+                      <span>{user.email}</span>
+                    </div>
+                    <div className={cardStyles.fieldRow}>
+                      <strong>Tasks</strong>
+                      <span>{assignedTasks.length > 0 ? assignedTasks.join(', ') : 'None'}</span>
+                    </div>
+                    {isSelected && (
+                      <div className={cardStyles.actions}>
+                        <button onClick={e => { e.stopPropagation(); startEdit(user); }}>
+                          <FiEdit size={14} /> Edit
+                        </button>
+                        <button
+                          className={cardStyles.removeBtn}
+                          onClick={async e => {
+                            e.stopPropagation();
+                            try {
+                              const res = await fetch(`/api/users/${user.id}`, { method: 'DELETE' });
+                              if (!res.ok) throw new Error('Failed to remove user');
+                              if (onUserUpdated) onUserUpdated();
+                            } catch (err) {
+                              alert(err.message);
+                            }
+                          }}
+                        >
+                          <FiTrash2 size={14} /> Remove
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

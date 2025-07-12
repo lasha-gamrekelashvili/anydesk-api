@@ -15,6 +15,8 @@ function App() {
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState(null)
   const [actionSuccess, setActionSuccess] = useState(null)
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
 
   useEffect(() => {
     fetch('/api/users')
@@ -102,12 +104,6 @@ function App() {
   return (
     <>
       <div className="dashboard-grid">
-        <div>
-          <AddUserForm onUserAdded={() => setUsersRefreshKey(k => k + 1)} />
-        </div>
-        <div>
-          <AddTaskForm onTaskAdded={() => setTasksRefreshKey(k => k + 1)} />
-        </div>
         <div className="users-list-scrollable">
           <UsersList
             users={users}
@@ -115,6 +111,7 @@ function App() {
             onSelect={handleUserSelect}
             selectedUserId={selectedUser?.id}
             onUserUpdated={() => setUsersRefreshKey(k => k + 1)}
+            onAddUser={() => setShowAddUser(true)}
           />
         </div>
         <div>
@@ -124,45 +121,48 @@ function App() {
             onSelect={handleTaskSelect}
             selectedTaskId={selectedTask?.id}
             onTaskUpdated={() => setTasksRefreshKey(k => k + 1)}
+            onAddTask={() => setShowAddTask(true)}
           />
         </div>
       </div>
-      {selectedUser && selectedTask && (
-        <div style={{ position: 'fixed', right: 24, top: 24, zIndex: 102, minWidth: 180, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          {(actionError || actionSuccess) && (
-            <div style={{
-              marginBottom: 8,
-              textAlign: 'center',
-              pointerEvents: 'none',
-            }}>
-              {actionError && <div style={{ color: 'red', background: '#fff', borderRadius: 5, padding: '6px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>{actionError}</div>}
-              {actionSuccess && <div style={{ color: 'green', background: '#fff', borderRadius: 5, padding: '6px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>{actionSuccess}</div>}
-            </div>
-          )}
-          <div className="modal-panel">
-            <div style={{ marginBottom: 8, fontSize: '0.98rem' }}>
-              <strong>User:</strong> {selectedUser.username} <br />
-              <strong>Task:</strong> {selectedTask.title}
-            </div>
-            {!isAssigned && (
-              <button
-                onClick={() => handleAssign(selectedUser, selectedTask)}
-                disabled={actionLoading}
-                style={{ marginRight: 8 }}
-              >
-                Assign
-              </button>
-            )}
-            {isAssigned && (
-              <button
-                onClick={() => handleRemove(selectedUser, selectedTask)}
-                disabled={actionLoading}
-              >
-                Remove
-              </button>
-            )}
+      {showAddUser && (
+        <div className="modal-overlay" style={{position: 'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.18)', zIndex: 200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(2px)'}}>
+          <div style={{background:'#fff', borderRadius:18, boxShadow:'0 8px 40px rgba(0,0,0,0.18)', border:'1.5px solid #e5e7eb', padding:'36px 32px 32px 32px', minWidth:340, maxWidth:400, position:'relative', display:'flex', flexDirection:'column', alignItems:'center'}}>
+            <button onClick={()=>setShowAddUser(false)} style={{position:'absolute', top:6, right:8, width:28, height:28, padding:0, background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#888', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'50%', lineHeight:1}}>&times;</button>
+            <div style={{height: 18}} />
+            <AddUserForm onUserAdded={() => { setUsersRefreshKey(k => k + 1); setShowAddUser(false); }} noCard />
           </div>
         </div>
+      )}
+      {showAddTask && (
+        <div className="modal-overlay" style={{position: 'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.18)', zIndex: 200, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(2px)'}}>
+          <div style={{background:'#fff', borderRadius:18, boxShadow:'0 8px 40px rgba(0,0,0,0.18)', border:'1.5px solid #e5e7eb', padding:'36px 32px 32px 32px', minWidth:340, maxWidth:400, position:'relative', display:'flex', flexDirection:'column', alignItems:'center'}}>
+            <button onClick={()=>setShowAddTask(false)} style={{position:'absolute', top:6, right:8, width:28, height:28, padding:0, background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#888', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'50%', lineHeight:1}}>&times;</button>
+            <div style={{height: 18}} />
+            <AddTaskForm onTaskAdded={() => { setTasksRefreshKey(k => k + 1); setShowAddTask(false); }} noCard />
+          </div>
+        </div>
+      )}
+      {selectedUser && selectedTask && (
+        <button
+          className={`assign-panel${(selectedUser && selectedTask) ? ' visible' : ''}${isAssigned ? ' unassign' : ''}`}
+          type="button"
+          onClick={() => {
+            if (isAssigned) {
+              handleRemove(selectedUser, selectedTask);
+            } else {
+              handleAssign(selectedUser, selectedTask);
+            }
+          }}
+          disabled={actionLoading}
+        >
+          <div className="assign-title">
+            <span className="assign-action">{isAssigned ? 'Unassign' : 'Assign'}</span>
+            <span className="assign-entity">
+              {selectedTask.title} {isAssigned ? 'from' : 'to'} {selectedUser.username}
+            </span>
+          </div>
+        </button>
       )}
     </>
   )
