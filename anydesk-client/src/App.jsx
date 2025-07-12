@@ -47,7 +47,6 @@ function App() {
       setActionSuccess('Task assigned to user!')
       setUsersRefreshKey(k => k + 1)
       setTasksRefreshKey(k => k + 1)
-      // Update selectedUser's taskIds immediately
       setSelectedUser(prev => prev && prev.id === user.id
         ? { ...prev, taskIds: [...(prev.taskIds || []), task.id] }
         : prev)
