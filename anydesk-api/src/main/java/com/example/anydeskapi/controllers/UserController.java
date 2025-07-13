@@ -25,8 +25,13 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String username,
+        @RequestParam(required = false) String email) {
+
+        return ResponseEntity.ok(userService.getAllUsers(page, size, username, email));
     }
 
     @GetMapping("/{id}")

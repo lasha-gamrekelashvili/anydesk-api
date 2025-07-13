@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,9 +26,15 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponseDto> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<TaskResponseDto>> getAllTasks(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String title,
+        @RequestParam(required = false) String description) {
+
+        return ResponseEntity.ok(taskService.getAllTasks(page, size, title, description));
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {

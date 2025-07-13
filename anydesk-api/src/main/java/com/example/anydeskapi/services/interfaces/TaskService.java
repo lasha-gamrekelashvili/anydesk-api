@@ -8,7 +8,7 @@ import java.util.List;
 public interface TaskService {
     TaskResponseDto createTask(TaskRequestDto requestDto);
 
-    List<TaskResponseDto> getAllTasks();
+    List<TaskResponseDto> getAllTasks(int page, int size, String title, String description);
 
     TaskResponseDto getTaskById(Long id);
 

@@ -7,6 +7,8 @@ import com.example.anydeskapi.dtos.TaskRequestDto;
 import com.example.anydeskapi.dtos.TaskResponseDto;
 import com.example.anydeskapi.services.interfaces.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,12 +34,24 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> getAllTasks() {
-        return taskRepository.findAll()
-            .stream()
-            .map(this::mapToDto)
-            .toList();
+    public List<TaskResponseDto> getAllTasks(int page, int size, String title, String description) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<TaskEntity> tasks;
+
+        if (title != null && description != null) {
+            tasks = taskRepository.findByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(title, description, pageable);
+        } else if (title != null) {
+            tasks = taskRepository.findByTitleContainingIgnoreCase(title, pageable);
+        } else if (description != null) {
+            tasks = taskRepository.findByDescriptionContainingIgnoreCase(description, pageable);
+        } else {
+            tasks = taskRepository.findAll(pageable).getContent();
+        }
+
+        return tasks.stream().map(this::mapToDto).toList();
     }
+
 
     @Override
     public TaskResponseDto getTaskById(Long id) {

@@ -8,9 +8,11 @@ import com.example.anydeskapi.dtos.UserRequestDto;
 import com.example.anydeskapi.dtos.UserResponseDto;
 import com.example.anydeskapi.services.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -33,12 +35,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll()
-            .stream()
-            .map(this::mapToDto)
-            .toList();
+    public List<UserResponseDto> getAllUsers(int page, int size, String username, String email) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<UserEntity> users;
+
+        if (username != null && email != null) {
+            users = userRepository.findByUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(username, email, pageable);
+        } else if (username != null) {
+            users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
+        } else if (email != null) {
+            users = userRepository.findByEmailContainingIgnoreCase(email, pageable);
+        } else {
+            users = userRepository.findAll(pageable).getContent();
+        }
+
+        return users.stream().map(this::mapToDto).toList();
     }
+
 
     @Override
     public UserResponseDto getUserById(Long id) {
