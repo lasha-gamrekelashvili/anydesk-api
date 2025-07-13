@@ -19,7 +19,7 @@ function App() {
   const [showAddTask, setShowAddTask] = useState(false);
 
   useEffect(() => {
-    fetch('/api/users')
+    fetch(`${import.meta.env.VITE_API_URL}/api/users`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch users')
         return res.json()
@@ -32,14 +32,13 @@ function App() {
   }, [usersRefreshKey])
 
   useEffect(() => {
-    fetch('/api/tasks')
+    fetch(`${import.meta.env.VITE_API_URL}/api/tasks`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch tasks')
         return res.json()
       })
       .then(fetchedTasks => {
         setTasks(fetchedTasks);
-        // Clear selectedTask if it no longer exists
         setSelectedTask(prev => prev && !fetchedTasks.some(t => t.id === prev.id) ? null : prev);
       })
       .catch(() => setTasks([]))
@@ -51,7 +50,7 @@ function App() {
     setActionError(null)
     setActionSuccess(null)
     try {
-      const res = await fetch(`/api/users/${user.id}/assign-task/${task.id}`, { method: 'PATCH' })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}/assign-task/${task.id}`, { method: 'PATCH' })
       if (!res.ok) throw new Error('Failed to assign task to user')
       setActionSuccess('Task assigned to user!')
       setUsersRefreshKey(k => k + 1)
@@ -72,7 +71,7 @@ function App() {
     setActionError(null)
     setActionSuccess(null)
     try {
-      const res = await fetch(`/api/users/${user.id}/remove-task/${task.id}`, { method: 'PATCH' })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}/remove-task/${task.id}`, { method: 'PATCH' })
       if (!res.ok) throw new Error('Failed to remove task from user')
       setActionSuccess('Task removed from user!')
       setUsersRefreshKey(k => k + 1)

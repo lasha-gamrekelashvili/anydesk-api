@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: anydeskdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123123
+    ports:
+      - "5434:5432"
+
+  backend:
+    build: ./anydesk-api
+    container_name: anydesk-api
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/anydeskdb
+      DB_USER: postgres
+      DB_PASSWORD: 123123
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./anydesk-client
+    container_name: anydesk-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

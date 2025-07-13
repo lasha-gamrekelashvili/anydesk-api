@@ -28,7 +28,7 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
     setEditLoading(true);
     setEditError(null);
     try {
-      const res = await fetch(`/api/tasks/${editTaskId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks/${editTaskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: editTitle, description: editDescription }),
@@ -136,7 +136,7 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
                           onClick={async e => {
                             e.stopPropagation();
                             try {
-                              const res = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+                              const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks/${task.id}`, { method: 'DELETE' });
                               if (!res.ok) throw new Error('Failed to remove task');
                               onTaskUpdated?.();
                             } catch (err) {

@@ -28,7 +28,7 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAd
     setEditLoading(true);
     setEditError(null);
     try {
-      const res = await fetch(`/api/users/${editUserId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${editUserId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: editUsername, email: editEmail }),
@@ -135,7 +135,7 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAd
                           onClick={async e => {
                             e.stopPropagation();
                             try {
-                              const res = await fetch(`/api/users/${user.id}`, { method: 'DELETE' });
+                              const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}`, { method: 'DELETE' });
                               if (!res.ok) throw new Error('Failed to remove user');
                               if (onUserUpdated) onUserUpdated();
                             } catch (err) {

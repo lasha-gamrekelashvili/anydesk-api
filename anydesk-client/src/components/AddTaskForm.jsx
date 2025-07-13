@@ -12,7 +12,7 @@ function AddTaskForm({ onTaskAdded, noCard }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/tasks', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description }),
