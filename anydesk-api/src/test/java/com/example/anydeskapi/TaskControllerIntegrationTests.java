@@ -46,16 +46,21 @@ class TaskControllerIntegrationTests {
 
     @Test
     void getAllTasks_ShouldReturnListOfTasks() throws Exception {
-        mockMvc.perform(post("/api/tasks").contentType(MediaType.APPLICATION_JSON).content("""
-            { "title": "Task 1", "description": "Desc 1" }
-        """));
-        mockMvc.perform(post("/api/tasks").contentType(MediaType.APPLICATION_JSON).content("""
-            { "title": "Task 2", "description": "Desc 2" }
-        """));
+        mockMvc.perform(post("/api/tasks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                { "title": "Task 1", "description": "Desc 1" }
+            """));
+
+        mockMvc.perform(post("/api/tasks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                { "title": "Task 2", "description": "Desc 2" }
+            """));
 
         mockMvc.perform(get("/api/tasks"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.content.length()").value(2));
     }
 
     @Test

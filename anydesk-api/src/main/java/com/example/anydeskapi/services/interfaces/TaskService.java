@@ -2,13 +2,14 @@ package com.example.anydeskapi.services.interfaces;
 
 import com.example.anydeskapi.dtos.TaskRequestDto;
 import com.example.anydeskapi.dtos.TaskResponseDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TaskService {
     TaskResponseDto createTask(TaskRequestDto requestDto);
 
-    List<TaskResponseDto> getAllTasks(int page, int size, String title, String description);
+    Page<TaskResponseDto> getAllTasks(int page, int size, String title, String description);
 
     TaskResponseDto getTaskById(Long id);
 

@@ -4,20 +4,25 @@ import com.example.anydeskapi.data.entities.TaskEntity;
 import com.example.anydeskapi.data.entities.UserEntity;
 import com.example.anydeskapi.data.repositories.TaskRepository;
 import com.example.anydeskapi.data.repositories.UserRepository;
+import com.example.anydeskapi.data.specifications.TaskSpecifications;
+import com.example.anydeskapi.data.specifications.UserSpecifications;
 import com.example.anydeskapi.dtos.UserRequestDto;
 import com.example.anydeskapi.dtos.UserResponseDto;
+import com.example.anydeskapi.mappers.EntityMapper;
 import com.example.anydeskapi.services.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -29,35 +34,31 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this email already exists.");
         }
 
-        UserEntity user = mapToEntity(requestDto);
+        UserEntity user = EntityMapper.mapToEntity(requestDto);
         UserEntity saved = userRepository.save(user);
-        return mapToDto(saved);
+        return EntityMapper.mapToDto(saved);
     }
 
     @Override
-    public List<UserResponseDto> getAllUsers(int page, int size, String username, String email) {
+    @Transactional(readOnly = true)
+    public Page<UserResponseDto> getAllUsers(int page, int size, String username, String email) {
         Pageable pageable = PageRequest.of(page, size);
-        List<UserEntity> users;
 
-        if (username != null && email != null) {
-            users = userRepository.findByUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(username, email, pageable);
-        } else if (username != null) {
-            users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
-        } else if (email != null) {
-            users = userRepository.findByEmailContainingIgnoreCase(email, pageable);
-        } else {
-            users = userRepository.findAll(pageable).getContent();
-        }
+        Specification<UserEntity> spec = UserSpecifications.hasUsername(username)
+            .and(UserSpecifications.hasEmail(email));
 
-        return users.stream().map(this::mapToDto).toList();
+        Page<UserEntity> users = userRepository.findAll(spec, pageable);
+
+        return users.map(EntityMapper:: mapToDto);
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        return mapToDto(user);
+        return EntityMapper.mapToDto(user);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
         existing.setEmail(requestDto.getEmail());
         UserEntity updated = userRepository.save(existing);
 
-        return mapToDto(updated);
+        return EntityMapper.mapToDto(updated);
     }
 
     @Override
@@ -114,26 +115,5 @@ public class UserServiceImpl implements UserService {
 
         user.getTasks().remove(task);
         userRepository.save(user);
-    }
-
-    private UserResponseDto mapToDto(UserEntity user) {
-        UserResponseDto dto = new UserResponseDto();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        if (user.getTasks() != null) {
-            dto.setTaskIds(user.getTasks()
-                .stream()
-                .map(TaskEntity::getId)
-                .toList());
-        }
-        return dto;
-    }
-
-    private UserEntity mapToEntity(UserRequestDto dto) {
-        UserEntity user = new UserEntity();
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        return user;
     }
 }

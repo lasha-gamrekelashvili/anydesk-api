@@ -2,13 +2,13 @@ package com.example.anydeskapi.services.interfaces;
 
 import com.example.anydeskapi.dtos.UserRequestDto;
 import com.example.anydeskapi.dtos.UserResponseDto;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface UserService {
     UserResponseDto createUser(UserRequestDto requestDto);
 
-    List<UserResponseDto> getAllUsers(int page, int size, String username, String email);
+    Page<UserResponseDto> getAllUsers(int page, int size, String username, String email);
 
     UserResponseDto getUserById(Long id);
 

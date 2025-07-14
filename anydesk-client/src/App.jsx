@@ -24,7 +24,8 @@ function App() {
         if (!res.ok) throw new Error('Failed to fetch users')
         return res.json()
       })
-      .then(fetchedUsers => {
+      .then(data => {
+        const fetchedUsers = data.content || [];
         setUsers(fetchedUsers);
         setSelectedUser(prev => prev && !fetchedUsers.some(u => u.id === prev.id) ? null : prev);
       })
@@ -37,7 +38,8 @@ function App() {
         if (!res.ok) throw new Error('Failed to fetch tasks')
         return res.json()
       })
-      .then(fetchedTasks => {
+      .then(data  => {
+        const fetchedTasks = data.content || [];
         setTasks(fetchedTasks);
         setSelectedTask(prev => prev && !fetchedTasks.some(t => t.id === prev.id) ? null : prev);
       })

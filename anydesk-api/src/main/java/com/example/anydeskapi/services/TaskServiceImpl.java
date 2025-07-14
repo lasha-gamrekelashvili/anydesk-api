@@ -3,20 +3,25 @@ package com.example.anydeskapi.services;
 import com.example.anydeskapi.data.entities.TaskEntity;
 import com.example.anydeskapi.data.entities.UserEntity;
 import com.example.anydeskapi.data.repositories.TaskRepository;
+import com.example.anydeskapi.data.specifications.TaskSpecifications;
 import com.example.anydeskapi.dtos.TaskRequestDto;
 import com.example.anydeskapi.dtos.TaskResponseDto;
+import com.example.anydeskapi.mappers.EntityMapper;
 import com.example.anydeskapi.services.interfaces.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
@@ -28,36 +33,32 @@ public class TaskServiceImpl implements TaskService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task with this title already exists.");
         }
 
-        TaskEntity task = mapToEntity(requestDto);
+        TaskEntity task = EntityMapper.mapToEntity(requestDto);
         TaskEntity saved = taskRepository.save(task);
-        return mapToDto(saved);
+        return EntityMapper.mapToDto(saved);
     }
 
     @Override
-    public List<TaskResponseDto> getAllTasks(int page, int size, String title, String description) {
+    @Transactional(readOnly = true)
+    public Page<TaskResponseDto> getAllTasks(int page, int size, String title, String description) {
         Pageable pageable = PageRequest.of(page, size);
 
-        List<TaskEntity> tasks;
+        Specification<TaskEntity> spec = TaskSpecifications.hasTitle(title)
+            .and(TaskSpecifications.hasDescription(description));
 
-        if (title != null && description != null) {
-            tasks = taskRepository.findByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(title, description, pageable);
-        } else if (title != null) {
-            tasks = taskRepository.findByTitleContainingIgnoreCase(title, pageable);
-        } else if (description != null) {
-            tasks = taskRepository.findByDescriptionContainingIgnoreCase(description, pageable);
-        } else {
-            tasks = taskRepository.findAll(pageable).getContent();
-        }
+        Page<TaskEntity> taskPage = taskRepository.findAll(spec, pageable);
 
-        return tasks.stream().map(this::mapToDto).toList();
+        return taskPage.map(EntityMapper::mapToDto);
     }
 
 
+
     @Override
+    @Transactional(readOnly = true)
     public TaskResponseDto getTaskById(Long id) {
         TaskEntity task = taskRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        return mapToDto(task);
+        return EntityMapper.mapToDto(task);
     }
 
     @Override
@@ -66,45 +67,22 @@ public class TaskServiceImpl implements TaskService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
         if (taskRepository.findAll().stream()
-            .anyMatch(t -> t.getTitle().equalsIgnoreCase(requestDto.getTitle()))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Another Task with this title already exists.");
+            .anyMatch(t -> !t.getId().equals(id) && t.getTitle().equalsIgnoreCase(requestDto.getTitle()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Another task with this title already exists.");
         }
 
         existing.setTitle(requestDto.getTitle());
         existing.setDescription(requestDto.getDescription());
         TaskEntity updated = taskRepository.save(existing);
 
-        return mapToDto(updated);
+        return EntityMapper.mapToDto(updated);
     }
+
 
     @Override
     public void deleteTask(Long id) {
         TaskEntity existing = taskRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
         taskRepository.delete(existing);
-    }
-
-    private TaskResponseDto mapToDto(TaskEntity task) {
-        TaskResponseDto dto = new TaskResponseDto();
-        dto.setId(task.getId());
-        dto.setTitle(task.getTitle());
-        dto.setDescription(task.getDescription());
-
-        if (task.getAssignedUsers() != null && !task.getAssignedUsers().isEmpty()) {
-            dto.setAssignedUserIds(
-                task.getAssignedUsers()
-                    .stream()
-                    .map(UserEntity::getId)
-                    .toList()
-            );
-        }
-        return dto;
-    }
-
-    private TaskEntity mapToEntity(TaskRequestDto dto) {
-        TaskEntity task = new TaskEntity();
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        return task;
     }
 }

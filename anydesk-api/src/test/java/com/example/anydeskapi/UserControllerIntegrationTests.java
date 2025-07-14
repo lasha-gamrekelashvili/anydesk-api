@@ -95,7 +95,7 @@ class UserControllerIntegrationTests {
 
         mockMvc.perform(get("/api/users"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.content.length()").value(2));
     }
 
     @Test
