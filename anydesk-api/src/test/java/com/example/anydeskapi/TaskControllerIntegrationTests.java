@@ -150,7 +150,7 @@ class TaskControllerIntegrationTests {
                 .content("""
                     { "title": "Duplicate", "description": "something else" }
                 """))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andExpect(jsonPath("$.error").value("Task with this title already exists."));
     }
 

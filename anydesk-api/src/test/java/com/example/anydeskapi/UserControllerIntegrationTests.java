@@ -54,7 +54,7 @@ class UserControllerIntegrationTests {
                 .content("""
                     { "username": "Duplicate", "email": "jon@example.com" }
                 """))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andExpect(jsonPath("$.error").value("User with this email already exists."));
     }
 
