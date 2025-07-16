@@ -8,6 +8,7 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
   const [editDescription, setEditDescription] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState(null);
+  const [deleteErrors, setDeleteErrors] = useState({}); 
 
   const startEdit = (task) => {
     setEditTaskId(task.id);
@@ -52,17 +53,19 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
     }
   };
 
+  const sortedTasks = [...tasks].sort((a, b) => a.title.localeCompare(b.title));
+
   return (
     <div className={styles.container}>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4, borderBottom: '2px solid #e5e7eb', marginBottom: 16}}>
         <div className={styles.title}>Tasks</div>
         <button className={styles.saveBtn} style={{marginLeft: 12}} onClick={e => { e.stopPropagation(); onAddTask && onAddTask(); }}>Add Task</button>
       </div>
-      {tasks.length === 0 ? (
+      {sortedTasks.length === 0 ? (
         <div className={styles.emptyMessage}>No tasks... maybe someone will add some</div>
       ) : (
         <ul>
-          {tasks.map((task) => {
+          {sortedTasks.map((task) => {
             const assignedUsers = (task.assignedUserIds || [])
               .map(id => users.find(u => u.id === id)?.username)
               .filter(Boolean);
@@ -75,6 +78,9 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
                 className={`${styles.cardItem} ${isSelected ? styles.selected : ''}`}
                 onClick={() => !isEditing && onSelect?.(task)}
               >
+                {deleteErrors[task.id] && (
+                  <div className={styles.errorInline} style={{marginBottom: 8}}>{deleteErrors[task.id]}</div>
+                )}
                 {isEditing ? (
                   <form className={styles.editForm} onSubmit={handleEditSubmit}>
                     <input
@@ -135,12 +141,20 @@ function TasksList({ tasks, users, onSelect, selectedTaskId, onTaskUpdated, onAd
                           className={styles.removeBtn}
                           onClick={async e => {
                             e.stopPropagation();
+                            setDeleteErrors(prev => ({ ...prev, [task.id]: null }));
                             try {
                               const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks/${task.id}`, { method: 'DELETE' });
-                              if (!res.ok) throw new Error('Failed to remove task');
+                              if (!res.ok) {
+                                let msg = 'Failed to remove task';
+                                try {
+                                  const data = await res.json();
+                                  if (data && (data.message || data.error)) msg = data.message || data.error;
+                                } catch {}
+                                throw new Error(msg);
+                              }
                               onTaskUpdated?.();
                             } catch (err) {
-                              alert(err.message);
+                              setDeleteErrors(prev => ({ ...prev, [task.id]: err.message }));
                             }
                           }}
                         >

@@ -52,17 +52,19 @@ function UsersList({ users, tasks, onSelect, selectedUserId, onUserUpdated, onAd
     }
   };
 
+  const sortedUsers = [...users].sort((a, b) => a.username.localeCompare(b.username));
+
   return (
     <div className={cardStyles.container}>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 4, borderBottom: '2px solid #e5e7eb', marginBottom: 16}}>
         <div className={cardStyles.title}>Users</div>
         <button className={cardStyles.saveBtn} style={{marginLeft: 12}} onClick={e => { e.stopPropagation(); onAddUser && onAddUser(); }}>Add User</button>
       </div>
-      {users.length === 0 ? (
+      {sortedUsers.length === 0 ? (
         <div className={cardStyles.emptyMessage}>No users... maybe someone will add some</div>
       ) : (
         <ul>
-          {users.map((user) => {
+          {sortedUsers.map((user) => {
             const assignedTasks = (user.taskIds || [])
               .map(taskId => tasks.find(t => t.id === taskId)?.title)
               .filter(Boolean);
