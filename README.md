@@ -1,4 +1,4 @@
-# 🖥️ Anydesk Full-Stack App
+# 🖥️ 
 
 - 🧠 **Backend**: Java (Spring Boot)
 - 🎨 **Frontend**: React + Vite
